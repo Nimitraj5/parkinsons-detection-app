@@ -31,9 +31,9 @@ echo "Build tools upgraded"
 
 # Try to install parselmouth separately first
 echo "Installing parselmouth..."
-pip install parselmouth==0.4.3 || {
+pip install parselmouth==1.1.1 || {
     echo "Failed to install parselmouth, trying alternative approach..."
-    pip install --no-deps parselmouth==0.4.3 || {
+    pip install --no-deps parselmouth==1.1.1 || {
         echo "Skipping parselmouth for now..."
     }
 }

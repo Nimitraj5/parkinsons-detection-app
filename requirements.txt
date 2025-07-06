@@ -4,7 +4,7 @@ pip>=22.0
 Flask==2.3.3
 Werkzeug==2.3.7
 numpy==1.24.3
-parselmouth==0.4.3
+parselmouth==1.1.1
 joblib==1.3.2
 reportlab==4.0.4
 scikit-learn==1.3.0
