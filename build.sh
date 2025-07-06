@@ -29,7 +29,12 @@ if pip install -r requirements.txt; then
     echo "Main requirements installed successfully"
 else
     echo "Main requirements failed, trying minimal requirements..."
-    pip install -r requirements-minimal.txt
+    if pip install -r requirements-minimal.txt; then
+        echo "Minimal requirements installed successfully"
+    else
+        echo "Minimal requirements failed, trying without dependencies..."
+        pip install -r requirements-no-googleads.txt
+    fi
 fi
 
 # Create necessary directories
