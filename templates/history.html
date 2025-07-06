@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test History - Parkinson's Detection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #4285F4;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn {
+            background-color: #fff;
+            color: #4285F4;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            background-color: #eee;
+        }
+        h1 {
+            margin: 0;
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .page-title {
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: fixed;
+        }
+        .history-table th, .history-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .history-table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+        .history-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        .positive {
+            color: #721c24;
+            font-weight: bold;
+        }
+        .negative {
+            color: #155724;
+            font-weight: bold;
+        }
+        .early {
+            color: #856404;
+            background-color: #fff3cd;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .moderate {
+            color: #8a4100;
+            background-color: #ffe0c4;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .advanced {
+            color: #721c24;
+            background-color: #f8d7da;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+        .chart-container {
+            margin-top: 30px;
+            height: 300px;
+        }
+        .back-btn {
+            margin-top: 20px;
+            display: inline-block;
+        }
+        .download-btn {
+            background-color: #4285F4;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9em;
+        }
+        .download-btn:hover {
+            background-color: #3367d6;
+        }
+        .download-btn i {
+            font-size: 1.1em;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 0 -20px;
+            padding: 0 20px;
+        }
+        @media screen and (max-width: 768px) {
+            .container {
+                margin: 15px;
+                padding: 15px;
+            }
+            .history-table th, .history-table td {
+                padding: 8px 10px;
+                font-size: 0.9em;
+            }
+            .download-btn {
+                padding: 4px 8px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Parkinson's Disease Detection</h1>
+        <a href="{{ url_for('home') }}" class="btn">Back to Testing</a>
+    </header>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <h2 class="page-title">Test History for {{ user_name }}</h2>
+
+        {% if results %}
+            <div class="table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">Date & Time</th>
+                            <th style="width: 12%">Jitter</th>
+                            <th style="width: 12%">Shimmer</th>
+                            <th style="width: 12%">Motor_updrs</th>
+                            <th style="width: 12%">PPE</th>
+                            <th style="width: 12%">Prediction</th>
+                            <th style="width: 12%">Stage</th>
+                            <th style="width: 13%">Export</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td>{{ result.test_date }}</td>
+                            <td>{{ result.jitter }}</td>
+                            <td>{{ result.shimmer }}</td>
+                            <td>{{ result.Motor_updrs }}</td>
+                            <td>{{ result.ppe }}</td>
+                            <td class="{{ 'positive' if result.prediction == 'Positive' else 'negative' }}">{{ result.prediction }}</td>
+                            <td>
+                                {% if result.stage == 'Early' %}
+                                    <span class="early">Early</span>
+                                {% elif result.stage == 'Moderate' %}
+                                    <span class="moderate">Moderate</span>
+                                {% elif result.stage == 'Advanced' %}
+                                    <span class="advanced">Advanced</span>
+                                {% else %}
+                                    {{ result.stage }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('export_single_pdf', test_id=result.id) }}" class="download-btn" target="_blank">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="no-results">
+                No test history available.
+            </div>
+        {% endif %}
+
+        <a href="{{ url_for('home') }}" class="btn back-btn">Back to Testing</a>
+    </div>
+
+</body>
+
+</html>

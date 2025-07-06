@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parkinson's Disease Detection</title>
+    <script src="https://cdn.WebRTC-Experiment.com/RecordRTC.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        header {
+            background-color: #4285F4;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .stage-description, .severity-stage {
+        font-size: 16px;
+        margin-top: 8px;
+        padding: 8px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        }
+
+    .severity-stage {
+        font-weight: bold;
+        margin-top: 12px;
+    }
+        
+        .user-name {
+            margin-right: 20px;
+            font-weight: bold;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            background-color: #fff;
+            color: #4285F4;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background-color: #eee;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            margin: 0;
+            color: white;
+        }
+        
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        
+        .upload-section {
+            margin-bottom: 30px;
+        }
+        
+        .audio-recorder {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .record-btn, .submit-btn {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        
+        .record-btn:hover, .submit-btn:hover {
+            background-color: #3367d6;
+        }
+        
+        .features-section, .prediction-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .feature-item {
+            margin-bottom: 10px;
+        }
+        
+        .feature-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+        }
+        
+        .prediction-result {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .stage-result {
+            font-size: 20px;
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .stage-description {
+            font-size: 16px;
+            margin-top: 8px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .positive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .negative {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .stage-1 {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .stage-2 {
+            background-color: #ffe0c4;
+            color: #8a4100;
+        }
+        
+        .stage-3 {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .stage-4 {
+            background-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .stage-5 {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .precautions-section {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f0f8ff; /* Light blue background */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: none; /* Initially hidden */
+}
+
+.precautions-section h3 {
+    color: #4285F4;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.precautions-section ul {
+    padding-left: 20px;
+    margin-bottom: 0;
+}
+
+.precautions-section li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* Updated stage colors for better visibility */
+.stage-1 {
+    background-color: #d4edda; /* Green - milder */
+    color: #155724;
+}
+
+.stage-2 {
+    background-color: #fff3cd; /* Yellow */
+    color: #856404;
+}
+
+.stage-3 {
+    background-color: #ffe0c4; /* Orange */
+    color: #8a4100;
+}
+
+.stage-4 {
+    background-color: #f8d7da; /* Light red */
+    color: #721c24;
+}
+
+.stage-5 {
+    background-color: #dc3545; /* Darker red */
+    color: white;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Parkinson's Disease Detection</h1>
+        <div class="user-info">
+            <span class="user-name">Welcome, {{ user.name }}</span>
+            <div class="nav-buttons">
+                <a href="{{ url_for('history') }}" class="btn">View History</a>
+                <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <section class="upload-section">
+            <h2>Upload Voice Recording</h2>
+            <p>Record or upload a voice sample to analyze for potential Parkinson's disease indicators.</p>
+            
+            <div class="audio-recorder">
+                <button id="recordButton" class="record-btn">Start Recording</button>
+                <span id="recordingStatus"></span>
+                <audio id="audioPlayback" controls style="display: none; width: 100%; margin-top: 15px;"></audio>
+                
+                <div style="margin-top: 20px;">
+                    <p>Or upload an audio file:</p>
+                    <input type="file" id="audioFileInput" accept=".wav,audio/wav">
+                </div>
+                
+                <button id="submitButton" class="submit-btn" disabled>Analyze Voice</button>
+            </div>
+        </section>
+        
+        <section id="featuresSection" class="features-section">
+            <h2>Extracted Voice Features</h2>
+            <div class="feature-item">
+                <span class="feature-label">Jitter:</span>
+                <span id="jitterValue"></span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-label">Shimmer:</span>
+                <span id="shimmerValue"></span>
+            </div>
+            <!-- <div class="feature-item">
+                <span class="feature-label">HNR:</span>
+                <span id="hnrValue"></span>
+            </div> -->
+            <div class="feature-item">
+                <span class="feature-label">PPE:</span>
+                <span id="ppeValue"></span>
+            </div>
+            
+            <button id="predictButton" class="submit-btn">Get Prediction</button>
+        </section>
+        
+        <section id="predictionSection" class="prediction-section">
+            <h2>Parkinson's Disease Prediction</h2>
+            <div id="predictionResult" class="prediction-result"></div>
+            <div id="stageResult" class="stage-result">
+                <div id="stageValue"></div>
+                <div id="stageDescription" class="stage-description"></div>
+                <div id="severityStage" class="severity-stage"></div>
+            </div>
+            
+            <!-- New precautions section -->
+            <div id="precautions" class="precautions-section">
+                <!-- Precautions will be dynamically added here -->
+            </div>
+            
+            <p>Note: This is a preliminary screening tool and not a medical diagnosis. Please consult with a healthcare professional for proper evaluation.</p>
+        </section>
+    </div>
+
+    <script>
+        let recorderRTC;
+        let audioStream;
+        let audioBlob;
+        let extractedFeatures;
+        
+        const recordButton = document.getElementById('recordButton');
+        const submitButton = document.getElementById('submitButton');
+        const audioPlayback = document.getElementById('audioPlayback');
+        const recordingStatus = document.getElementById('recordingStatus');
+        const audioFileInput = document.getElementById('audioFileInput');
+        const featuresSection = document.getElementById('featuresSection');
+        const predictionSection = document.getElementById('predictionSection');
+    
+        // Recording functionality with RecordRTC
+        recordButton.addEventListener('click', async () => {
+            if (recorderRTC) {
+                stopRecording();
+                return;
+            }
+    
+            try {
+                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                recorderRTC = RecordRTC(audioStream, {
+                    type: 'audio',
+                    mimeType: 'audio/wav',
+                    recorderType: StereoAudioRecorder,
+                    desiredSampRate: 44100,
+                    numberOfAudioChannels: 1
+                });
+    
+                recorderRTC.startRecording();
+                
+                recordButton.textContent = 'Stop Recording';
+                recordingStatus.textContent = 'Recording...';
+                audioPlayback.style.display = 'none';
+                submitButton.disabled = true;
+    
+                // Auto-stop after 30 seconds
+                setTimeout(() => {
+                    if (recorderRTC) {
+                        stopRecording();
+                        showMessage('Maximum recording duration (30 seconds) reached', 'info');
+                    }
+                }, 30000);
+    
+            } catch (error) {
+                showMessage('Error accessing microphone: ' + error.message, 'error');
+            }
+        });
+    
+        function stopRecording() {
+            if (!recorderRTC) return;
+            
+            recorderRTC.stopRecording(async () => {
+                const blob = recorderRTC.getBlob();
+                audioBlob = blob;
+                const audioUrl = URL.createObjectURL(blob);
+                
+                audioPlayback.src = audioUrl;
+                audioPlayback.style.display = 'block';
+                submitButton.disabled = false;
+                
+                recordButton.textContent = 'Start Recording';
+                recordingStatus.textContent = 'Recording stopped';
+                
+                // Cleanup
+                audioStream.getTracks().forEach(track => track.stop());
+                recorderRTC = null;
+            });
+        }
+    
+        // File upload handling
+        audioFileInput.addEventListener('change', () => {
+            const file = audioFileInput.files[0];
+            if (file) {
+                if (!file.type.includes('wav')) {
+                    showMessage('Invalid file type. Only WAV files are allowed.', 'error');
+                    audioFileInput.value = '';
+                    return;
+                }
+                
+                audioBlob = file;
+                const audioUrl = URL.createObjectURL(file);
+                audioPlayback.src = audioUrl;
+                audioPlayback.style.display = 'block';
+                submitButton.disabled = false;
+            }
+        });
+    
+        // Analysis submission
+        submitButton.addEventListener('click', async () => {
+            if (!audioBlob) return;
+    
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+    
+            submitButton.disabled = true;
+            submitButton.textContent = 'Analyzing...';
+    
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) throw new Error(data.error);
+    
+                extractedFeatures = data.features;
+                document.getElementById('jitterValue').textContent = (extractedFeatures.jitter || 0).toFixed(6);
+                document.getElementById('shimmerValue').textContent = (extractedFeatures.shimmer || 0).toFixed(6);
+                //document.getElementById('hnrValue').textContent = (extractedFeatures.hnr || 0).toFixed(2);
+                document.getElementById('ppeValue').textContent = (extractedFeatures.ppe || 0).toFixed(6);
+                
+                featuresSection.style.display = 'block';
+                predictionSection.style.display = 'none';
+    
+            } catch (error) {
+                showMessage(error.message, 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Analyze Voice';
+            }
+        });
+    
+        document.getElementById('predictButton').addEventListener('click', async () => {
+    if (!extractedFeatures) return;
+
+    const predictButton = document.getElementById('predictButton');
+    predictButton.disabled = true;
+    predictButton.textContent = 'Processing...';
+    
+    // Sanitize the features to prevent NaN values which cause JSON parsing errors
+    const sanitizedFeatures = {
+        jitter: isNaN(extractedFeatures.jitter) ? 0 : extractedFeatures.jitter,
+        shimmer: isNaN(extractedFeatures.shimmer) ? 0 : extractedFeatures.shimmer,
+       
+        ppe: isNaN(extractedFeatures.ppe) ? 0 : extractedFeatures.ppe,
+        motor_updrs: isNaN(extractedFeatures.motor_updrs) ? 0 : extractedFeatures.motor_updrs,
+        scaled_features: Array.isArray(extractedFeatures.scaled_features) ? 
+            extractedFeatures.scaled_features.map(row => 
+                Array.isArray(row) ? 
+                    row.map(val => isNaN(val) ? 0 : val) : 
+                    []
+            ) : []
+    };
+
+    const payload = {
+        features: sanitizedFeatures
+    };
+
+    try {
+        const response = await fetch('/predict', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        
+        if (data.error) throw new Error(data.error);
+
+        const predictionResult = document.getElementById('predictionResult');
+        const stageValue = document.getElementById('stageValue');
+        const stageDescription = document.getElementById('stageDescription');
+        const severityStage = document.getElementById('severityStage');
+        const stageResult = document.getElementById('stageResult');
+        const precautionsElement = document.getElementById('precautions');
+
+        // For Stage 1 and 1.5, show "No Parkinson's Disease Detected"
+        if (data.stage === 'Stage 1' || data.stage === 'Stage 1.5') {
+            predictionResult.textContent = 'No Parkinson\'s Disease Detected';
+            predictionResult.className = 'prediction-result negative';
+        } else {
+            predictionResult.textContent = 'Potential Parkinson\'s Disease Detected';
+            predictionResult.className = 'prediction-result positive';
+        }
+
+        // Always show stage information
+        stageValue.textContent = `Stage: ${data.stage}`;
+        stageDescription.textContent = `Clinical Description: ${data.description}`;
+        severityStage.textContent = `Severity Assessment: ${data.severity_stage}`;
+        
+        // Add precautions based on stage
+        const precautions = getPrecautionsForStage(data.stage);
+        precautionsElement.innerHTML = `<h3>Recommended Precautions</h3><ul>${
+            precautions.map(p => `<li>${p}</li>`).join('')
+        }</ul>`;
+        precautionsElement.style.display = 'block';
+        
+        // Apply styling
+        const stageClass = getStageClass(data.stage);
+        stageResult.className = `stage-result ${stageClass}`;
+        stageResult.style.display = 'block';
+        predictionSection.style.display = 'block';
+
+    } catch (error) {
+        showMessage(error.message, 'error');
+    } finally {
+        predictButton.disabled = false;
+        predictButton.textContent = 'Get Prediction';
+    }
+});
+
+// Function to get precautions based on stage
+function getPrecautionsForStage(stage) {
+    if (stage === 'Stage 1' || stage === 'Stage 1.5') {
+        return [
+            'Regular exercise to maintain flexibility and balance',
+            'Voice exercises to maintain speech clarity',
+            'Regular medical check-ups (every 6-12 months)',
+            'Balanced diet rich in antioxidants',
+            'Stay mentally active with puzzles and reading'
+        ];
+    } else if (stage === 'Stage 2' || stage === 'Stage 2.5') {
+        return [
+            'Physical therapy focused on posture and gait',
+            'Speech therapy to address any emerging speech difficulties',
+            'Regular exercise with focus on balance training',
+            'Consider assistive devices for fine motor tasks if needed',
+            'Follow medication schedule strictly if prescribed'
+        ];
+    } else if (stage === 'Stage 3') {
+        return [
+            'Home safety modifications to prevent falls',
+            'Regular physical therapy sessions',
+            'Use of mobility aids when necessary',
+            'Swallowing exercises if beginning to experience difficulties',
+            'Regular neurological assessments (every 3-6 months)'
+        ];
+    } else if (stage === 'Stage 4') {
+        return [
+            'Home adaptation for wheelchair accessibility if needed',
+            'Daily assisted stretching and movement exercises',
+            'Specialized equipment for daily activities',
+            'Consider occupational therapy for adaptive techniques',
+            'Regular monitoring for complications'
+        ];
+    } else if (stage === 'Stage 5') {
+        return [
+            'Professional nursing care or assistance',
+            'Specialized bed and positioning equipment',
+            'Swallowing assessment and potential feeding modifications',
+            'Regular monitoring for respiratory complications',
+            'Palliative care consultation if appropriate'
+        ];
+    } else {
+        return [
+            'Consult with a neurologist for personalized advice',
+            'Regular physical activity appropriate to your ability level',
+            'Balanced diet and proper hydration',
+            'Adequate rest and stress management',
+            'Follow prescribed medication regimen if applicable'
+        ];
+    }
+}
+
+// Updated to handle stages like "2.5"
+function getStageClass(stage) {
+    if (!stage) return '';
+    // Extract the main stage number (2.5 becomes 2)
+    const stageNum = parseInt(stage.replace(/\D/g,'').charAt(0));
+    return `stage-${stageNum}`;
+}
+    
+        function showMessage(text, type = 'info') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = text;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(messageDiv, container.firstChild);
+            
+            setTimeout(() => messageDiv.remove(), 5000);
+        }
+        
+        function getStageClass(stage) {
+            if (!stage) return '';
+            if (stage.includes('1')) return 'stage-1';
+            if (stage.includes('2')) return 'stage-2';
+            if (stage.includes('3')) return 'stage-3';
+            if (stage.includes('4')) return 'stage-4';
+            if (stage.includes('5')) return 'stage-5';
+            return '';
+        }
+    </script>
+</body>
+</html>
