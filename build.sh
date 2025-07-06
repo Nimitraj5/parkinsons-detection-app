@@ -23,8 +23,14 @@ apt-get install -y \
 # Upgrade pip and install build tools first
 python -m pip install --upgrade pip setuptools wheel
 
-# Install Python dependencies
-pip install -r requirements.txt
+# Try to install main requirements first
+echo "Installing main requirements..."
+if pip install -r requirements.txt; then
+    echo "Main requirements installed successfully"
+else
+    echo "Main requirements failed, trying minimal requirements..."
+    pip install -r requirements-minimal.txt
+fi
 
 # Create necessary directories
 mkdir -p uploads
