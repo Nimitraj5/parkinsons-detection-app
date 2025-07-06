@@ -2,6 +2,8 @@
 # exit on error
 set -o errexit
 
+echo "Starting build process..."
+
 # Update package lists
 apt-get update
 
@@ -20,13 +22,29 @@ apt-get install -y \
     autoconf \
     automake
 
+echo "System dependencies installed"
+
 # Upgrade pip and install build tools first
 python -m pip install --upgrade pip setuptools wheel
 
-# Install Python dependencies
+echo "Build tools upgraded"
+
+# Try to install parselmouth separately first
+echo "Installing parselmouth..."
+pip install parselmouth==0.4.3 || {
+    echo "Failed to install parselmouth, trying alternative approach..."
+    pip install --no-deps parselmouth==0.4.3 || {
+        echo "Skipping parselmouth for now..."
+    }
+}
+
+# Install other Python dependencies
+echo "Installing other dependencies..."
 pip install -r requirements.txt
 
 # Create necessary directories
 mkdir -p uploads
 mkdir -p static
-mkdir -p templates 
+mkdir -p templates
+
+echo "Build completed successfully" 

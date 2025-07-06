@@ -1,2 +1,5 @@
 # This file ensures the uploads directory is tracked in Git
 # The directory is needed for the application to function properly 
+
+setuptools>=65.5.0
+wheel 
